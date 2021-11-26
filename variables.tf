@@ -86,3 +86,14 @@ variable "db_admin_pwd" {
   default     = "admin"
   description = "An adminstrative user password"
 }
+
+variable "keypair_name" {
+  type        = string
+  description = "Keypair name"
+  default     = "mongo-publicKey"
+}
+
+variable "public_key" {
+  type        = string
+  description = "Public key file path"
+}

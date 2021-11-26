@@ -1,0 +1,13 @@
+- hosts: default
+  become: true
+  roles:
+    - role: community.mongodb.mongodb_linux
+    - role: community.mongodb.mongodb_repository
+    - role: community.mongodb.mongodb_install
+      mongodb_version: "3.6"
+    - role: community.mongodb.mongodb_mongod
+      db_path: /data/db
+      repl_set_name: RS_NAME
+      replicaset: true
+      sharding: true
+      mongod_config_template: mongod-custom.conf.j2

@@ -1,10 +1,25 @@
-data "aws_ami" "image" {
+locals {
+  ami_id             = var.ami == "" ? data.aws_ami.ami.id : var.ami
+  public_key_name    = var.keypair_name
+  device_name        = "/dev/xvdh"
+  replica_count      = var.replica_count < 1 ? 1 : var.replica_count
+}
+
+# TODO: add in the EBS volume attachment
+# HACK: setting to false after it's created the first time
+resource "aws_key_pair" "mongo_keypair" {
+  key_name   = "${local.public_key_name}-${uuid()}"
+  public_key = var.public_key
+}
+
+data "aws_ami" "ami" {
   most_recent = true
   owners      = ["self"]
 
   filter {
     name   = "name"
-    values = [join("_", [var.platform, "mongodb-${var.mongodb_version}", var.ami_version])]
+    # ubuntu-18.04_mongodb-3.6_v0.1
+    values = ["ubuntu-18.04_mongodb-3.6_v0.1"]
   }
 }
 
@@ -21,11 +36,11 @@ data "template_file" "user_data" {
 
 resource "aws_instance" "mongodb" {
   count                  = var.replica_count
-  ami                    = var.ami == "" ? data.aws_ami.image.id : var.ami
+  ami                    = local.ami_id
   instance_type          = var.instance_type
   subnet_id              = var.subnet_id
   vpc_security_group_ids = var.vpc_security_group_ids
-  key_name               = var.key_name
+  key_name               = aws_key_pair.mongo_keypair.key_name
   tags                   = var.tags
   user_data              = data.template_file.user_data.rendered
 }
@@ -63,4 +78,8 @@ resource "null_resource" "replicaset_initialization_and_users" {
     bastion_host = var.bastion_host
     agent        = true
   }
+}
+output "ami_search_result" {
+  description = "ami search result"
+  value = data.aws_ami.ami.*
 }

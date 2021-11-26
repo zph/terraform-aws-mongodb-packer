@@ -30,4 +30,5 @@ function main() {
     killServices
 }
 
-main
+# TODO: learn why they want this stopped
+# main

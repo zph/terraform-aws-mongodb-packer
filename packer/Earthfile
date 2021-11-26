@@ -1,0 +1,7 @@
+FROM ubuntu:18.04
+
+build:
+  RUN apt-get update
+  RUN apt-get install -y vim sudo curl gpg lsb-release software-properties-common unzip
+  COPY ./ .
+  RUN false
